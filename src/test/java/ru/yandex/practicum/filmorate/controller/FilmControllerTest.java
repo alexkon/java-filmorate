@@ -77,9 +77,8 @@ class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(2020, 12, 28));
         film.setDuration(100L);
 
-        filmController.createFilm(film);
-
-        List<Film> allFilms = filmController.getFilms();
-        assertEquals(200, allFilms.get(0).getDescription().length(), "неверная длина поля Description");
+        RuntimeException trow = assertThrows(RuntimeException.class, () -> {
+            filmController.createFilm(film);});
+        assertEquals("описание фильма превышает 200 символов", trow.getMessage());
     }
 }

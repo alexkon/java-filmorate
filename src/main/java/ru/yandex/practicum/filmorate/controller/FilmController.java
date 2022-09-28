@@ -69,8 +69,8 @@ public class FilmController {
         }
 
         if (film.getDescription().length() > descriptionLength) {
-            log.info("описание фильма сокращено до " + descriptionLength + " символов");
-            film.setDescription(film.getDescription().substring(0, descriptionLength));
+            log.info("описание фильма превышает " + descriptionLength + " символов");
+            throw new ValidationException("описание фильма превышает " + descriptionLength + " символов");
         }
     }
 }
