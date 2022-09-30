@@ -26,48 +26,49 @@ public class UserController {
     @PostMapping("/users")
     public User createUser(@RequestBody User user) {
         if (users.containsValue(user)) {
-            log.error("Post-запрос не выполнен, такой пользователь уже зарегистрирован");
+            log.error(String.format("Post-запрос не выполнен: %s - уже зарегистрирован", user));
             throw new ValidationException("Post-запрос не выполнен, такой пользователь уже зарегистрирован");
         }
         verification(user);
         id++;
         user.setId(id);
         users.put(id, user);
-        log.info("Post-запрос выполнен. Добавлен новый пользователь.");
+        log.info(String.format("Post-запрос выполнен: добавлен новый %s", user));
         return user;
     }
 
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
         if (!users.containsKey(user.getId())) {
-            log.error("Put-запрос не выполнен, неправильный id");
+            log.error(String.format("Put-запрос не выполнен: пользователь с id=%s - не зарегистрирован", user.getId()));
             throw new ValidationException("Put-запрос не выполнен, неправильный id");
         }
         verification(user);
         users.put(user.getId(), user);
-        log.info("Put-запрос выполнен. Данные пользователя обновлены.");
+        log.info(String.format("Put-запрос выполнен: обновлен %s", user));
         return user;
     }
 
     private void verification(User user) {
 
         if (!StringUtils.hasLength(user.getEmail()) || !user.getEmail().contains("@")) {
-            log.error("электронная почта задана некорректно.");
+            log.error(String.format("Запрос не выполнен: email=%s - задан некорректно", user.getEmail()));
             throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
         }
 
         if (!StringUtils.hasText(user.getLogin())) {
-            log.error("логин задан некорректно");
+            log.error("Запрос не выполнен: логин либо пустой, либо содержит только пробелы");
             throw new ValidationException("логин не может быть пустым и содержать только пробелы");
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("дата рождения больше текущей даты.");
+            log.error(String.format("Запрос не выполнен: дата рождения=%s - больше текущей даты", user.getBirthday()));
             throw new ValidationException("дата рождения не может быть в будущем");
         }
 
         if (!StringUtils.hasText(user.getName())) {
-            log.info("имя пользователя отсутствует, заменено на логин");
+            log.info(String.format("Запрос выполнен с ограничением: имя пользователя отсутствует - заменено на логин=%s",
+                    user.getLogin()));
             user.setName(user.getLogin());
         }
     }

@@ -26,51 +26,54 @@ public class FilmController {
     @PostMapping("/films")
     public Film createFilm(@RequestBody Film film) {
         if (films.containsValue(film)) {
-            log.error("Post-запрос не выполнен, такой фильм уже есть в фильмотеке");
-            throw new ValidationException("Post-запрос не выполнен, такой фильм уже есть в фильмотеке");
+            log.error(String.format("Post-запрос не выполнен: %s - уже есть в фильмотеке", film));
+            throw new ValidationException("Post-запрос не выполнен: такой фильм уже есть в фильмотеке");
         }
         verification(film);
         id++;
         film.setId(id);
         films.put(id, film);
-        log.info("Post-запрос выполнен. Фильм добавлен в фильмотеку.");
+        log.info(String.format("Post-запрос выполнен: добавлен в фильмотеку %s", film));
         return film;
     }
 
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) {
         if (!films.containsKey(film.getId())) {
-            log.error("Put-запрос не выполнен, неправильный id");
+            log.error(String.format("Put-запрос не выполнен: фильма с id=%s - нет в фильмотеке", film.getId()));
             throw new ValidationException("Put-запрос не выполнен, неправильный id");
         }
         verification(film);
         films.put(film.getId(), film);
-        log.info("Put-запрос выполнен. Фильм обновлен.");
+        log.info(String.format("Put-запрос выполнен: обновлен %s", film));
         return film;
     }
 
     private void verification(Film film) {
-        int descriptionLength = 200;
+        int descriptionMaxLength = 200;
         LocalDate releaseDateBefore = LocalDate.of(1895, 12, 28);
 
         if (!StringUtils.hasText(film.getName())) {
-            log.error("отсутствует название фильма.");
+            log.error("Запрос не выполнен: отсутствует название фильма.");
             throw new ValidationException("название не может быть пустым");
         }
 
         if (film.getReleaseDate().isBefore(releaseDateBefore) ) {
-            log.error("дата релиза — раньше 28 декабря 1895 года");
+            log.error(String.format("Запрос не выполнен: дата релиза=%s меньше %s",
+                    film.getReleaseDate(), releaseDateBefore));
             throw new ValidationException("дата релиза — раньше 28 декабря 1895 года");
         }
 
         if (film.getDuration() <= 0) {
-            log.error("продолжительность фильма задана некорректно");
+            log.error(String.format("Запрос не выполнен: продолжительность фильма=%s - должна быть больше 0",
+                    film.getDuration()));
             throw new ValidationException("продолжительность фильма задана некорректно");
         }
 
-        if (film.getDescription().length() > descriptionLength) {
-            log.info("описание фильма превышает " + descriptionLength + " символов");
-            throw new ValidationException("описание фильма превышает " + descriptionLength + " символов");
+        if (film.getDescription().length() > descriptionMaxLength) {
+            log.info(String.format("Запрос не выполнен: длина описания фильма=%s символов - должна быть не более %s",
+                    film.getDescription().length(), descriptionMaxLength));
+            throw new ValidationException("описание фильма превышает " + descriptionMaxLength + " символов");
         }
     }
 }

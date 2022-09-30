@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class FilmControllerTest {
     @Autowired
-    FilmController filmController;
+    private FilmController filmController;
 
     @Test
     void createFilmFailName() {

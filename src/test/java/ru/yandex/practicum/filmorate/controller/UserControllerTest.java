@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class UserControllerTest {
     @Autowired
-    UserController userController;
+    private UserController userController;
 
     @Test
     void createUserFailEmail() {
@@ -32,7 +32,7 @@ class UserControllerTest {
     @Test
     void createUserEmptyEmail() {
         User user = new User();
-        user.setEmail("user-yandex.ru");
+        user.setEmail("");
         user.setLogin("Login");
         user.setName("Name");
         user.setBirthday(LocalDate.of(1997, 11, 29));
