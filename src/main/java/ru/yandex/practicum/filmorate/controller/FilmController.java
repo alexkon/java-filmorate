@@ -26,26 +26,26 @@ public class FilmController {
     @PostMapping("/films")
     public Film createFilm(@RequestBody Film film) {
         if (films.containsValue(film)) {
-            log.error(String.format("Post-запрос не выполнен: %s - уже есть в фильмотеке", film));
+            log.error("Post-запрос не выполнен: {} - уже есть в фильмотеке", film);
             throw new ValidationException("Post-запрос не выполнен: такой фильм уже есть в фильмотеке");
         }
         verification(film);
         id++;
         film.setId(id);
         films.put(id, film);
-        log.info(String.format("Post-запрос выполнен: добавлен в фильмотеку %s", film));
+        log.info("Post-запрос выполнен: добавлен в фильмотеку {}", film);
         return film;
     }
 
     @PutMapping("/films")
     public Film updateFilm(@RequestBody Film film) {
         if (!films.containsKey(film.getId())) {
-            log.error(String.format("Put-запрос не выполнен: фильма с id=%s - нет в фильмотеке", film.getId()));
+            log.error("Put-запрос не выполнен: фильма с id={} - нет в фильмотеке", film.getId());
             throw new ValidationException("Put-запрос не выполнен, неправильный id");
         }
         verification(film);
         films.put(film.getId(), film);
-        log.info(String.format("Put-запрос выполнен: обновлен %s", film));
+        log.info("Put-запрос выполнен: обновлен {}", film);
         return film;
     }
 
@@ -59,20 +59,20 @@ public class FilmController {
         }
 
         if (film.getReleaseDate().isBefore(releaseDateBefore) ) {
-            log.error(String.format("Запрос не выполнен: дата релиза=%s меньше %s",
-                    film.getReleaseDate(), releaseDateBefore));
+            log.error("Запрос не выполнен: дата релиза={} меньше {}",
+                    film.getReleaseDate(), releaseDateBefore);
             throw new ValidationException("дата релиза — раньше 28 декабря 1895 года");
         }
 
         if (film.getDuration() <= 0) {
-            log.error(String.format("Запрос не выполнен: продолжительность фильма=%s - должна быть больше 0",
-                    film.getDuration()));
+            log.error("Запрос не выполнен: продолжительность фильма={} - должна быть больше 0",
+                    film.getDuration());
             throw new ValidationException("продолжительность фильма задана некорректно");
         }
 
         if (film.getDescription().length() > descriptionMaxLength) {
-            log.info(String.format("Запрос не выполнен: длина описания фильма=%s символов - должна быть не более %s",
-                    film.getDescription().length(), descriptionMaxLength));
+            log.info("Запрос не выполнен: длина описания фильма={} символов - должна быть не более {}",
+                    film.getDescription().length(), descriptionMaxLength);
             throw new ValidationException("описание фильма превышает " + descriptionMaxLength + " символов");
         }
     }
