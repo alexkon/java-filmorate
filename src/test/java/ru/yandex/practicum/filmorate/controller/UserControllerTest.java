@@ -91,7 +91,7 @@ class UserControllerTest {
 
         userController.createUser(user);
 
-        List<User> allUsers = userController.getUsers();
+        List<User> allUsers = userController.getAllUsers();
         assertEquals(user.getLogin(), allUsers.get(0).getName(), "имя пользователя не заменено на логин");
     }
 }
