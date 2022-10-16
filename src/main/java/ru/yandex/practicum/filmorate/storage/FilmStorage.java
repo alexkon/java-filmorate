@@ -6,11 +6,17 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 
 public interface FilmStorage {
-    public Film create(Film film);
-    public Film update(Film film);
-    public Film getById(long filmId);
-    public List<Film> getAll();
-    public Film deleteById(long filmId);
-    public void addLike(Film film, User user);
-    public void deleteLike(Film film, User user);
+    Film create(Film film);
+
+    Film update(Film film);
+
+    Film getById(long filmId);
+
+    List<Film> getAll();
+
+    Film deleteById(long filmId);
+
+    void addLike(Film film, User user);
+
+    void deleteLike(Film film, User user);
 }

@@ -16,7 +16,7 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @GetMapping()
     public List<User> getAllUsers() {
@@ -26,25 +26,24 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable long userId){
+    public User getUserById(@PathVariable long userId) {
         User user = userService.getById(userId);
         log.info("Get-запрос: id={} - пользователь: {}", userId, user);
         return user;
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriendsUserId(@PathVariable long userId){
+    public List<User> getFriendsUserId(@PathVariable long userId) {
         List<User> friends = userService.getFriendsByUserId(userId);
-        log.info("Get-запрос: всего друзей={} у пользователя {}",
-                friends.size(), userService.getById(userId));
+        log.info("Get-запрос: всего друзей={} : {}", friends.size(), friends);
         return friends;
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable long userId, @PathVariable long otherId){
+    public List<User> getCommonFriends(@PathVariable long userId, @PathVariable long otherId) {
         List<User> friendsCommon = userService.getCommonFriends(userId, otherId);
-        log.info("Get-запрос: общих друзей={} у пользователей {} и {}",
-                friendsCommon.size(), userService.getById(userId), userService.getById(otherId));
+        log.info("Get-запрос: общих друзей={} : {}",
+                friendsCommon.size(), friendsCommon);
         return friendsCommon;
     }
 
@@ -67,19 +66,13 @@ public class UserController {
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable long userId, @PathVariable long friendId) {
         userService.addFriend(userId, friendId);
-        log.info("Put-запрос:  у пользователя {} новый друг - {}, всего друзей {} и {}",
-                userService.getById(userId), userService.getById(friendId),
-                userService.getById(userId).getFriendIds().size(),
-                userService.getById(friendId).getFriendIds().size());
+        log.info("Put-запрос:  у пользователя с id={} новый друг c id={}", userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable long userId, @PathVariable long friendId) {
         userService.deleteFriend(userId, friendId);
-        log.info("Delete-запрос:  у пользователя {} удален из друзей - {}, осталось друзей {} и {}",
-                userService.getById(userId), userService.getById(friendId),
-                userService.getById(userId).getFriendIds().size(),
-                userService.getById(friendId).getFriendIds().size());
+        log.info("Delete-запрос:  у пользователя с id={} удален друг c id={}", userId, friendId);
     }
 
     private void verification(User user) {

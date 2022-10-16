@@ -9,19 +9,16 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
     @Autowired
-    FilmService filmService;
+    private FilmService filmService;
     @Autowired
-    UserController userController;
+    private UserController userController;
 
     @GetMapping()
     public List<Film> getAllFilms() {
@@ -37,11 +34,11 @@ public class FilmController {
         return film;
     }
 
-        @GetMapping("/popular")
-        public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) String count) {
-            List<Film> films = filmService.getPopular(count);
-            log.info("Get-запрос: первые {} популярных фильмов: {}", count, films);
-            return films;
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10", required = false) String count) {
+        List<Film> films = filmService.getPopular(count);
+        log.info("Get-запрос: первые {} популярных фильмов: {}", count, films);
+        return films;
     }
 
     @PostMapping()
@@ -63,15 +60,13 @@ public class FilmController {
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable long filmId, @PathVariable long userId) {
         filmService.addLike(filmId, userId);
-        log.info("Put-запрос:  новый лайк у фильма {}, всего лайков={} ",
-                filmService.getById(filmId), filmService.getById(filmId).getRate());
+        log.info("Put-запрос:  новый лайк у фильма с id={}", userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void deleteLike(@PathVariable long filmId, @PathVariable long userId) {
         filmService.deleteLike(filmId, userId);
-        log.info("Put-запрос:  дизлайк у фильма {} , осталось лайков={} ",
-                filmService.getById(filmId), filmService.getById(filmId).getRate());
+        log.info("Delete-запрос:  дизлайк у фильма с id={}", userId);
     }
 
     private void verification(Film film) {
@@ -83,7 +78,7 @@ public class FilmController {
             throw new ValidationException("название не может быть пустым");
         }
 
-        if (film.getReleaseDate().isBefore(releaseDateBefore) ) {
+        if (film.getReleaseDate().isBefore(releaseDateBefore)) {
             log.error("Запрос не выполнен: дата релиза={} меньше {}",
                     film.getReleaseDate(), releaseDateBefore);
             throw new ValidationException("дата релиза — раньше 28 декабря 1895 года");

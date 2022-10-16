@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
     @Autowired
-    FilmStorage filmStorage;
+    private FilmStorage filmStorage;
     @Autowired
-    UserStorage userStorage;
+    private UserStorage userStorage;
 
     public Film create(Film film) {
         if (filmStorage.getAll().contains(film)) {
@@ -27,10 +27,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        final Long filmId = film.getId();
-        if (filmStorage.getById(filmId) == null) {
-            throw new NotFoundException(String.format("Фильм с id=%s не найден", filmId));
-        }
+        getFilmNotNull(film.getId());
         return filmStorage.update(film);
     }
 
@@ -48,7 +45,7 @@ public class FilmService {
         return filmStorage.deleteById(filmId);
     }
 
-    public void addLike(long filmId, long userId){
+    public void addLike(long filmId, long userId) {
         final Film film = getFilmNotNull(filmId);
         final User user = userStorage.getById(userId);
 
@@ -59,7 +56,7 @@ public class FilmService {
         filmStorage.addLike(film, user);
     }
 
-    public void deleteLike(long filmId, long userId){
+    public void deleteLike(long filmId, long userId) {
         final Film film = getFilmNotNull(filmId);
         final User user = userStorage.getById(userId);
 
@@ -73,7 +70,7 @@ public class FilmService {
     public List<Film> getPopular(String count) {
         List<Film> films = getAll();
         return films.stream()
-                .sorted( (f0, f1) -> compare(f0, f1))
+                .sorted((f0, f1) -> compare(f0, f1))
                 .limit(Long.parseLong(count))
                 .collect(Collectors.toList());
     }
@@ -85,7 +82,6 @@ public class FilmService {
         result = -1 * result;
         return result;
     }
-
 
     private Film getFilmNotNull(long filmId) {
         Film film = filmStorage.getById(filmId);
