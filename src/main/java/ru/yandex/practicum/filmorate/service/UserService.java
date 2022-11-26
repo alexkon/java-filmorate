@@ -2,10 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.HashSet;
@@ -15,14 +17,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    //@Qualifier("inMemoryUserStorage")
     @Autowired
     private UserStorage userStorage;
+    @Autowired
+    private FriendStorage friendStorage;
 
     public User create(User user) {
         if (userStorage.getAll().contains(user)) {
             throw new ValidationException(String.format("Пользователь {} - уже зарегистрирован", user));
         }
-        return userStorage.create(user);
+        User newUser = userStorage.create(user);
+        return newUser;
     }
 
     public User update(User user) {
@@ -40,20 +46,14 @@ public class UserService {
     }
 
     public List<User> getFriendsByUserId(long userId) {
-        final User user = getUserNotNull(userId);
-        return user.getFriendIds().stream()
-                .map(this::getById)
-                .collect(Collectors.toList());
+        getUserNotNull(userId);
+        return friendStorage.getFriendsById(userId);
     }
 
     public List<User> getCommonFriends(long userId, Long otherId) {
-        final User user = getUserNotNull(userId);
-        final User otherUser = getUserNotNull(otherId);
-        Set<Long> commonFriends = new HashSet<>(user.getFriendIds());
-        commonFriends.retainAll(otherUser.getFriendIds());
-        return commonFriends.stream()
-                .map(this::getById)
-                .collect(Collectors.toList());
+        getUserNotNull(userId);
+        getUserNotNull(otherId);
+        return friendStorage.getCommonFriends(userId, otherId);
     }
 
     public User deleteById(long userId) {
@@ -62,15 +62,15 @@ public class UserService {
     }
 
     public void addFriend(long userId, long friendId) {
-        final User user = getUserNotNull(userId);
-        final User friend = getUserNotNull(friendId);
-        userStorage.addFriend(user, friend);
+        getUserNotNull(userId);
+        getUserNotNull(friendId);
+        friendStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(long userId, long friendId) {
-        final User user = getUserNotNull(userId);
-        final User friend = getUserNotNull(friendId);
-        userStorage.deleteFriend(user, friend);
+        getUserNotNull(userId);
+        getUserNotNull(friendId);
+        friendStorage.deleteFriend(userId, friendId);
     }
 
     private User getUserNotNull(long userId) {

@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
@@ -94,7 +96,7 @@ public class UserController {
 
         if (!StringUtils.hasText(user.getName())) {
             log.info("Запрос выполнен с ограничением: имя пользователя отсутствует - заменено на логин={}",
-                    user.getLogin());
+            user.getLogin());
             user.setName(user.getLogin());
         }
     }

@@ -1,23 +1,34 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
+
     @Autowired
-    private FilmStorage filmStorage;
+    private FilmStorage filmStorage;    // 15:51
+    //@Qualifier("inMemoryUserStorage")
     @Autowired
     private UserStorage userStorage;
+    @Autowired
+    private LikeStorage likeStorage;
+    @Autowired
+    private GenreStorage genreStorage;
+    @Autowired
+    private MpaStorage mpaStorage;
+
 
     public Film create(Film film) {
         if (filmStorage.getAll().contains(film)) {
@@ -27,7 +38,9 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        System.out.println(film);
         getFilmNotNull(film.getId());
+        System.out.println(film);
         return filmStorage.update(film);
     }
 
@@ -40,6 +53,21 @@ public class FilmService {
         return filmStorage.getAll();
     }
 
+    public Genre getGenreById(int genreId) {
+        return genreStorage.getById(genreId);
+    }
+    public List<Genre> getAllGenres() {
+        return genreStorage.getAll();
+    }
+
+    public Mpa getMpaById(int mpaId) {
+        return mpaStorage.getById(mpaId);
+    }
+
+    public List<Mpa> getAllMpa() {
+        return mpaStorage.getAll();
+    }
+
     public Film deleteById(Long filmId) {
         final Film film = getFilmNotNull(filmId);
         return filmStorage.deleteById(filmId);
@@ -49,38 +77,26 @@ public class FilmService {
         final Film film = getFilmNotNull(filmId);
         final User user = userStorage.getById(userId);
 
-        if (user == null) {
-            throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
-        }
+//        if (user == null) {
+//            throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
+//        }
 
-        filmStorage.addLike(film, user);
+        likeStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(long filmId, long userId) {
         final Film film = getFilmNotNull(filmId);
         final User user = userStorage.getById(userId);
 
-        if (user == null) {
-            throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
-        }
+//        if (user == null) {
+//            throw new NotFoundException(String.format("Пользователь с id=%s не найден", userId));
+//        }
 
-        filmStorage.deleteLike(film, user);
+        likeStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getPopular(String count) {
-        List<Film> films = getAll();
-        return films.stream()
-                .sorted((f0, f1) -> compare(f0, f1))
-                .limit(Long.parseLong(count))
-                .collect(Collectors.toList());
-    }
-
-    private int compare(Film film1, Film film2) {
-        String f1 = String.valueOf(film1.getRate());
-        String f2 = String.valueOf(film2.getRate());
-        int result = f1.compareTo(f2);
-        result = -1 * result;
-        return result;
+        return likeStorage.getPopular(count);
     }
 
     private Film getFilmNotNull(long filmId) {
