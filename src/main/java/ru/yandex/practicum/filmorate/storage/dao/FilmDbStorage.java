@@ -23,6 +23,8 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage {
     @Autowired
     MpaDbStorage mpaDbStorage;
+    @Autowired
+    GenreDbStorage genreDbStorage;
     private JdbcTemplate jdbcTemplate;
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -37,7 +39,7 @@ public class FilmDbStorage implements FilmStorage {
         long filmId = simpleJdbcInsert.executeAndReturnKey(film.toMap()).longValue();
         film.setId(filmId);
 
-//        updateGenres(film);
+        updateGenres(film);
         return film;
     }
 
@@ -55,6 +57,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film getById(long filmId) {
         String sql = "SELECT * FROM films AS f, mpa AS m WHERE f.mpa_id = m.mpa_id AND f.film_id = ?";
         List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), filmId);
+        genreDbStorage.setGenresForFilms(films);
 
         if(films.size() != 1) {
             throw new NotFoundException(String.format("Фильм с id=%s не найден", filmId));
@@ -67,6 +70,7 @@ public class FilmDbStorage implements FilmStorage {
 //        final String sql = "SELECT * FROM films AS f, mpa AS m WHERE f.film_id = m.mpa_id";
         final String sql = "SELECT * FROM films AS f JOIN mpa AS m ON f.mpa_id = m.mpa_id";
         final List<Film> films = jdbcTemplate.query(sql, FilmDbStorage::makeFilm);
+        genreDbStorage.setGenresForFilms(films);
         return films;
     }
 

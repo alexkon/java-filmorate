@@ -47,16 +47,17 @@ public class GenreDbStorage implements GenreStorage {
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs, rowNum));
     }
 
-//    public void setGenresForFilms(List<Film> films) {
-//        String forInSql = String.join(",", Collections.nCopies(films.size(), "?"));
-//        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
-//        final String sql = "SELECT * FROM film_genres AS fg, genres AS g, " +
-//                "WHERE fg.genre_id = g.genre_id fg.genre_id = IN (" + forInSql + ")";
-//        jdbcTemplate.query(sql, (rs) -> {
-//            final Film film = filmById.get(rs.getLong("film_id"));
-//            film.addGenre(makeGenre(rs, 0));
-//        }, films.stream().map(FilmStorage::getId).toArray());
-//    }
+    public void setGenresForFilms(List<Film> films) {
+        String forInSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+        final String sql = "SELECT * FROM film_genres AS fg, genres AS g " +
+                "WHERE fg.genre_id = g.genre_id and fg.film_id IN (" + forInSql + ")";
+        jdbcTemplate.query(sql, (rs) -> {
+            final Film film = filmById.get(rs.getLong("film_id"));
+            film.addGenre(makeGenre(rs, 0));
+        }, films.stream().map(Film::getId).toArray());
+    }
+
     static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException{   //24:41
         return new Genre(
                 rs.getInt("genre_id"),
